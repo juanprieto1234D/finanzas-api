@@ -1,13 +1,10 @@
-FROM php:8.2-apache
+FROM php:apache
 
-# Instalar extensión mysqli
-RUN docker-php-ext-install mysqli
+# Instalar la extensión mysqli que falta según tus logs
+RUN docker-php-ext-install mysqli && docker-php-ext-enable mysqli
 
-# Cambiar el puerto por defecto de Apache al que Railway espera (8080)
-RUN sed -i 's/80/8080/g' /etc/apache2/sites-available/0000-default.conf /etc/apache2/ports.conf
-
-# Copiar archivos al contenedor
+# Copiar todos tus archivos al servidor
 COPY . /var/www/html/
 
-# Exponer el puerto
-EXPOSE 8080
+# Asegurar que Apache escuche en el puerto que Railway le asigne
+CMD ["apache2-foreground"]
