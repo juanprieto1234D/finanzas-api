@@ -1,10 +1,14 @@
-FROM php:apache
+FROM php:8.2-apache
 
-# Instalar la extensión mysqli que falta según tus logs
+# 1. Instalar la extensión mysqli para conectar con la base de datos
 RUN docker-php-ext-install mysqli && docker-php-ext-enable mysqli
 
-# Copiar todos tus archivos al servidor
+# 2. Configurar Apache para que use el puerto que Railway le asigne automáticamente
+RUN sed -i 's/Listen 80/Listen ${PORT}/g' /etc/apache2/ports.conf
+RUN sed -i 's/<VirtualHost \*:80>/<VirtualHost *:${PORT}>/g' /etc/apache2/sites-available/000-default.conf
+
+# 3. Copiar tus archivos al servidor
 COPY . /var/www/html/
 
-# Asegurar que Apache escuche en el puerto que Railway le asigne
-CMD ["apache2-foreground"]
+# 4. Dar permisos para evitar errores de lectura
+RUN chown -r www-data:www-data /var/www/html
